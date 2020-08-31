@@ -8,7 +8,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 load_dotenv(".env", verbose=True)
 
 
-def create_app(settings_override=None):
+def create_app(settings_override=None) -> Flask:
     """
     Creating a Flask application using the app factory pattern
     Args:
@@ -19,7 +19,7 @@ def create_app(settings_override=None):
 
     application = Flask(__name__, instance_relative_config=True)
 
-    application.config.from_object("instance.settings")
+    application.config.from_object("config.settings")
     application.config.from_pyfile("settings.py", silent=True)
 
     if settings_override:
@@ -31,7 +31,7 @@ def create_app(settings_override=None):
     return application
 
 
-def middleware(application):
+def middleware(application: Flask) -> None:
     """
     Register 0 or more middleware (mutates the app passed in).
 
