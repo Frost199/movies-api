@@ -3,10 +3,13 @@ User Model
 """
 import datetime
 from collections import OrderedDict
+from uuid import uuid4
+
+import pytz
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
-from libs.normalize_email import normalize_email
+from libs.email import normalize_email
 from libs.sqlalchemy_util import AwareDateTime
 from libs.util_datetime import tzware_datetime
 
@@ -55,8 +58,28 @@ class UserModel(db.Model):
             raise ValueError("email must be provided")
         user.email = normalize_email(email)
         user.password = UserModel.encrypt_password(password)
+        user.id = uuid4().hex
+        user.created_on = datetime.datetime.now(pytz.utc)
 
         return user
+
+    @classmethod
+    def find_by_email(cls, email: str) -> "UserModel":
+        """
+        find user by email
+        :param email:
+        :return:
+        """
+        return cls.query.filter_by(email=email).first()
+
+    @classmethod
+    def find_by_id(cls, _id: int) -> "UserModel":
+        """
+        find user by id
+        :param _id:
+        :return:
+        """
+        return cls.query.filter_by(id=_id).first()
 
     @staticmethod
     def create_superuser(email: str, password: str) -> "UserModel":

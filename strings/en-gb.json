@@ -1,0 +1,5 @@
+{
+  "user_registered": "Account created successfully",
+  "user_email_bad_format": "{} format is not a valid email",
+  "user_email_exist": "This email is already registered"
+}

@@ -1,10 +1,14 @@
 """
 Flask base app for Movies API
 """
-from flask import Flask
+from flask import Flask, jsonify
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
+from marshmallow import ValidationError
+
+from Resources.users.routes import UserUrl
+from urls_abstract import AbsUrls
 
 load_dotenv(".env", verbose=True)
 
@@ -31,6 +35,7 @@ def create_app(settings_override=None) -> Flask:
     application.logger.setLevel(application.config["LOG_LEVEL"])
     middleware(application)
     extension(application)
+    register_resource(application)
     db_migrate(application, db)
 
     return application
@@ -48,6 +53,16 @@ def middleware(application: Flask) -> None:
     application.wsgi_app = ProxyFix(application.wsgi_app)
 
     return None
+
+
+def register_resource(application: Flask):
+    """
+    Register API resource
+    :param application:
+    :return:
+    """
+    api = AbsUrls.register_application(application)
+    UserUrl.add_url(api)
 
 
 def db_migrate(application: Flask, db_to_migrate: db) -> None:
@@ -69,13 +84,23 @@ def extension(application: Flask) -> None:
     Returns: None
 
     """
-    # mail.init_app(app)
     db.init_app(application)
     marsh.init_app(application)
     cors.init_app(application)
 
 
 movies_app = create_app()
+
+
+@movies_app.errorhandler(ValidationError)
+def handle_marshmallow_validation(err):
+    """
+    Handle Marshmallow serialization errors
+    :param err:
+    :return:
+    """
+    return jsonify(err.messages), 400
+
 
 if __name__ == "__main__":
     movies_app.run()
