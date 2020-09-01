@@ -45,6 +45,8 @@ class UserModel(db.Model):
     current_sign_in_ip = db.Column(db.String(45))
     last_sign_in_on = db.Column(AwareDateTime())
     last_sign_in_ip = db.Column(db.String(45))
+    tracking = db.relationship("TrackingModel", lazy="dynamic",
+                               cascade="all, delete-orphan")
 
     @staticmethod
     def create_user(email: str, password: str) -> "UserModel":
@@ -66,18 +68,24 @@ class UserModel(db.Model):
     @classmethod
     def find_by_email(cls, email: str) -> "UserModel":
         """
-        find user by email
-        :param email:
-        :return:
+        Find a user by email
+        Args:
+            email: email value to use in searching for user
+
+        Returns:
+            UserModel class object
         """
         return cls.query.filter_by(email=email).first()
 
     @classmethod
     def find_by_id(cls, _id: int) -> "UserModel":
         """
-        find user by id
-        :param _id:
-        :return:
+        Find a user by id
+        Args:
+            _id: user id to use in searching for a user
+
+        Returns:
+            UserModel class object
         """
         return cls.query.filter_by(id=_id).first()
 
@@ -123,6 +131,26 @@ class UserModel(db.Model):
             str
         """
         return generate_password_hash(password)
+
+    def update_activity_tracking(self, ip_address: str):
+        """
+        Update various fields on the user that's related to meta data on their
+        account, such as the sign in count and ip address, etc..
+        Args:
+            ip_address:
+
+        Returns:
+
+        """
+        self.sign_in_count += 1
+
+        self.last_sign_in_on = self.current_sign_in_on
+        self.last_sign_in_ip = self.current_sign_in_ip
+
+        self.current_sign_in_on = datetime.datetime.now(pytz.utc)
+        self.current_sign_in_ip = ip_address
+
+        self.save()
 
     def save(self) -> None:
         """

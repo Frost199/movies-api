@@ -3,6 +3,7 @@ Flask base app for Movies API
 """
 from flask import Flask, jsonify
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
 from marshmallow import ValidationError
@@ -90,6 +91,114 @@ def extension(application: Flask) -> None:
 
 
 movies_app = create_app()
+jwt = JWTManager(movies_app)
+
+
+# adding claims to a jwt to check somethings the user claims to be
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    """
+    Add claims to a JWT identity
+    Args:
+        identity: User identity
+    Returns:
+        JSON of type Boolean
+    """
+    from Models.users.user import UserModel
+    admin = UserModel.query.first()
+
+    # instead of hard coding, read from database or config file
+    if identity["_id"] == admin.id:
+        return {"is_admin": True}
+    return {"is_admin": False}
+
+
+# customised message for expired JWT token
+@jwt.expired_token_loader
+def expired_token_callback():
+    """
+    Custom Error message for an expired token
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify({"description": "This token has expired",
+                 "error": "token_expired"}),
+        401,
+    )
+
+
+# customised message for an invalid token
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    """
+    Customized message for a token that is invalid
+    Args:
+        error: error passed
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify(
+            {"description": "Signature verification failed",
+             "error": "invalid_token"}
+        ),
+        401,
+    )
+
+
+# customised message when no Jwt is present
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    """
+    Missing token customized message
+    Args:
+        error: Error passed
+
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify(
+            {
+                "description": "Request doe not contain an access token",
+                "error": "authorization_required",
+            }
+        ),
+        401,
+    )
+
+
+# customised message for a fresh token
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback():
+    """
+    When a token is not fresh
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify({"description": "Token is not fresh",
+                 "error": "fresh_token_required"}),
+        401,
+    )
+
+
+# Revoking a token when user logs out or token has being revoked
+@jwt.revoked_token_loader
+def revoked_token_loader():
+    """
+    Message when a token is revoked
+    Returns:
+
+    """
+    return (
+        jsonify(
+            {"description": "The token has been revoked",
+             "error": "token_revoked"}
+        ),
+        401,
+    )
 
 
 @movies_app.errorhandler(ValidationError)

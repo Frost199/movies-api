@@ -17,7 +17,7 @@ class TrackingModel(db.Model):
     created_on = db.Column(AwareDateTime(), default=tzware_datetime,
                            nullable=False)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey("user.id"), nullable=False)
     user = db.relationship("UserModel")
 
     def __init__(self, user_id: int, **kwargs):

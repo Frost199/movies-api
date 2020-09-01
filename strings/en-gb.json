@@ -1,5 +1,8 @@
 {
   "user_registered": "Account created successfully",
   "user_email_bad_format": "{} format is not a valid email",
-  "user_email_exist": "This email is already registered"
+  "user_email_exist": "This email is already registered",
+  "user_disabled": "Account has been disabled",
+  "user_invalid": "email and password incorrect",
+  "user_error_logging_in": "Internal server error, failed to log in user"
 }

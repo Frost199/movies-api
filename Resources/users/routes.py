@@ -5,7 +5,7 @@ from flask import Flask
 from flask_restful import Api
 
 from urls_abstract import AbsUrls
-from Resources.users.user import UserRegistration
+from Resources.users.user import UserRegistration, UserLogin
 
 
 class UserUrl(AbsUrls):
@@ -26,3 +26,4 @@ class UserUrl(AbsUrls):
 
         """
         api.add_resource(UserRegistration, '/auth/register')
+        api.add_resource(UserLogin, '/auth/login')
