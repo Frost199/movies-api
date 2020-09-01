@@ -5,8 +5,9 @@ python:
 install:
   - pip install -r requirements.txt
 env:
-  - APP_SECRET_KEY=supersecretkey
-  - JWT_SECRET_KEY=supersecretkey
+  global:
+    - APP_SECRET_KEY=supersecretkey
+    - JWT_SECRET_KEY=supersecretkey
 
 script:
   - python -m unittest
