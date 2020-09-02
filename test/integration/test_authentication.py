@@ -1,7 +1,6 @@
 """
 Authentication tests
 """
-import unittest
 
 from Models.users.user import UserModel as User
 from .base_setup import BaseSetup, BASE_URL

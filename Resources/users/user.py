@@ -19,7 +19,6 @@ from libs.strings import get_text
 sign_in_store = redis.StrictRedis(host='localhost', port=6379, db=0,
                                   decode_responses=True)
 ACCESS_EXPIRES = datetime.timedelta(hours=1)
-ACCESS_LOGIN_EXPIRES = datetime.timedelta(minutes=30)
 REFRESH_EXPIRES = datetime.timedelta(days=30)
 
 user_schema = UserSchema()
@@ -92,7 +91,7 @@ def generate_auth_token(user, location_ip, fresh=True):
     Returns:
 
     """
-    access_expires = ACCESS_LOGIN_EXPIRES
+    access_expires = ACCESS_EXPIRES
     refresh_expires = REFRESH_EXPIRES
 
     access_token = create_access_token(
