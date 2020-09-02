@@ -1,14 +1,19 @@
 """
 Flask base app for Movies API
 """
-from flask import Flask
+from flask import Flask, jsonify
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
+from marshmallow import ValidationError
 
 load_dotenv(".env", verbose=True)
 
 from extensions import db, marsh, cors
+from Resources.users.routes import UserUrl
+from Resources.movies.routes import MoviesUrl
+from urls_abstract import AbsUrls
 
 
 def create_app(settings_override=None) -> Flask:
@@ -31,6 +36,7 @@ def create_app(settings_override=None) -> Flask:
     application.logger.setLevel(application.config["LOG_LEVEL"])
     middleware(application)
     extension(application)
+    register_resource(application)
     db_migrate(application, db)
 
     return application
@@ -48,6 +54,17 @@ def middleware(application: Flask) -> None:
     application.wsgi_app = ProxyFix(application.wsgi_app)
 
     return None
+
+
+def register_resource(application: Flask):
+    """
+    Register API resource
+    :param application:
+    :return:
+    """
+    api = AbsUrls.register_application(application)
+    UserUrl.add_url(api)
+    MoviesUrl.add_url(api)
 
 
 def db_migrate(application: Flask, db_to_migrate: db) -> None:
@@ -69,13 +86,127 @@ def extension(application: Flask) -> None:
     Returns: None
 
     """
-    # mail.init_app(app)
     db.init_app(application)
     marsh.init_app(application)
     cors.init_app(application)
 
 
 movies_app = create_app()
+jwt = JWTManager(movies_app)
+
+
+# adding claims to a jwt to check somethings the user claims to be
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    """
+    Add claims to a JWT identity
+    Args:
+        identity: User identity
+    Returns:
+        JSON of type Boolean
+    """
+    from Models.users.user import UserModel
+    admin = UserModel.query.first()
+
+    # instead of hard coding, read from database or config file
+    if identity["_id"] == admin.id:
+        return {"is_admin": True}
+    return {"is_admin": False}
+
+
+# customised message for expired JWT token
+@jwt.expired_token_loader
+def expired_token_callback():
+    """
+    Custom Error message for an expired token
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify({"description": "This token has expired",
+                 "error": "token expired"}),
+        401,
+    )
+
+
+# customised message for an invalid token
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    """
+    Customized message for a token that is invalid
+    Args:
+        error: error passed
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify(
+            {"description": "Signature verification failed",
+             "error": "invalid token"}
+        ),
+        401,
+    )
+
+
+# customised message when no Jwt is present
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    """
+    Missing token customized message
+    Args:
+        error: Error passed
+
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify(
+            {
+                "description": "Request does not contain an access token",
+                "error": "authorization required",
+            }
+        ),
+        401,
+    )
+
+
+# customised message for a fresh token
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback():
+    """
+    When a token is not fresh
+    Returns:
+        JSON and Status code
+    """
+    return (
+        jsonify({"description": "Token is not fresh",
+                 "error": "fresh token required"}),
+        401,
+    )
+
+
+@movies_app.errorhandler(ValidationError)
+def handle_marshmallow_validation(err):
+    """
+    Handle Marshmallow serialization errors
+    :param err:
+    :return:
+    """
+    return jsonify(err.messages), 400
+
+
+@movies_app.errorhandler(404)
+def handle_404(err) -> jsonify:
+    """
+    Handle 404 errors
+    Args:
+        err:
+
+    Returns:
+
+    """
+    return jsonify({"description": str(err), "error": "unknown resource"}), 404
+
 
 if __name__ == "__main__":
     movies_app.run()
