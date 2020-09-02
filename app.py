@@ -8,13 +8,12 @@ from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
 from marshmallow import ValidationError
 
-from Resources.movies.routes import MoviesUrl
-from Resources.users.routes import UserUrl
-from urls_abstract import AbsUrls
-
 load_dotenv(".env", verbose=True)
 
 from extensions import db, marsh, cors
+from Resources.users.routes import UserUrl
+from Resources.movies.routes import MoviesUrl
+from urls_abstract import AbsUrls
 
 
 def create_app(settings_override=None) -> Flask:

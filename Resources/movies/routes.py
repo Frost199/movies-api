@@ -3,7 +3,7 @@ User Resource Url module
 """
 from flask_restful import Api
 
-from Resources.movies.movies import MoviesList
+from Resources.movies.movies import MoviesList, Movies
 from urls_abstract import AbsUrls
 
 
@@ -25,3 +25,4 @@ class MoviesUrl(AbsUrls):
 
         """
         api.add_resource(MoviesList, "/movies/external/<int:page>")
+        api.add_resource(Movies, "/movies")

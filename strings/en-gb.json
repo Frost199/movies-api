@@ -9,5 +9,13 @@
   "user_id_none": "user id is missing",
   "user_not_found": "User not found",
 
-  "movies_pagination_out_bounds": "Movies pagination is just from {} to {}"
+  "movies_pagination_out_bounds": "Movies pagination is just from {} to {}",
+  "movie_created": "Movie has been added to your list",
+  "error_adding_movie": "Internal server error!, failed to add movie to your list",
+  "movie_exist": "Movie with title '{}' has already been added to your list",
+  "movie_not_exist": "Movie with title '{}' does not exist in your list, consider adding it first",
+  "error_updating_movie": "Internal server error!, failed to update movie in your list",
+  "movie_updated": "Rating of the movie with title '{}' has been updated successfully",
+  "movie_removed": "Movie with title '{}' has been removed from your list",
+  "error_deleting_movie": "Internal server error!, failed to remove movie from your list"
 }
