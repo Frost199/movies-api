@@ -1,6 +1,7 @@
 """
 Movie Resource for user
 """
+import os
 from typing import Dict
 
 from flask_jwt_extended import jwt_required
@@ -9,7 +10,8 @@ from flask_restful import Resource
 from Services.movie_service import get_movies
 from libs.strings import get_text
 
-MOVIES_URL = 'https://api.themoviedb.org/3/movie/popular?api_key='
+MOVIES_URL = 'https://api.themoviedb.org/3/movie/popular?api_key=' + \
+             os.environ.get("MOVIE_API_KEY")
 MOVIES_PER_PAGE = 20
 MOVIES_MAX_PAGINATION = 10
 MOVIES_MIN_PAGINATION = 1
@@ -33,7 +35,7 @@ class MoviesList(Resource):
                 MOVIES_MIN_PAGINATION, MOVIES_MAX_PAGINATION)},
                     400)
         response = get_movies(
-            MOVIES_URL + '849f15719681915156404e9a0cd9a744&language=en-US',
+            MOVIES_URL + '&language=en-US',
             page)
         response = response.json()
         result = response['results']
