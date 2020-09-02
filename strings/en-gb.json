@@ -4,5 +4,10 @@
   "user_email_exist": "This email is already registered",
   "user_disabled": "Account has been disabled",
   "user_invalid": "email and password incorrect",
-  "user_error_logging_in": "Internal server error, failed to log in user"
+  "user_error_logging_in": "Internal server error, failed to log in user",
+  "body_missing": "Body Missing",
+  "user_id_none": "user id is missing",
+  "user_not_found": "User not found",
+
+  "movies_pagination_out_bounds": "Movies pagination is just from {} to {}"
 }

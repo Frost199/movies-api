@@ -47,6 +47,8 @@ class UserModel(db.Model):
     last_sign_in_ip = db.Column(db.String(45))
     tracking = db.relationship("TrackingModel", lazy="dynamic",
                                cascade="all, delete-orphan")
+    # movies = db.relationship("MovieModel", lazy="dynamic",
+    #                          cascade="all, delete-orphan")
 
     @staticmethod
     def create_user(email: str, password: str) -> "UserModel":

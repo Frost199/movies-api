@@ -7,7 +7,8 @@ import datetime
 import pytz
 import redis
 from flask import request
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, \
+    jwt_refresh_token_required, get_jwt_identity
 from flask_restful import Resource
 
 from Models.users.tracking import TrackingModel as TrackLogin
@@ -85,6 +86,24 @@ class UserLogin(Resource):
             return {"message": get_text("user_error_logging_in")}, 500
 
 
+class TokenRefresh(Resource):
+    """
+    make a token refresh using the user id
+    """
+
+    @classmethod
+    @jwt_refresh_token_required
+    def post(cls):
+        """
+        post request to have a new access token
+        Returns:
+
+        """
+        current_user = get_jwt_identity()
+        access_token, _ = generate_auth_token(current_user, 0, fresh=False)
+        return {"access_token": access_token}, 201
+
+
 def generate_auth_token(user, location_ip, fresh=True):
     """
     generate auth token
@@ -93,14 +112,16 @@ def generate_auth_token(user, location_ip, fresh=True):
     """
     access_expires = ACCESS_EXPIRES
     refresh_expires = REFRESH_EXPIRES
-
+    if isinstance(user, UserModel):
+        user_data = {"_id": user.id, "email": user.email}
+    else:
+        user_data = user
     access_token = create_access_token(
-        identity={"_id": user.id, "email": user.email},
+        identity=user_data,
         fresh=fresh,
         expires_delta=access_expires
     )
-    refresh_token = create_refresh_token({"_id": user.id,
-                                          "email": user.email},
+    refresh_token = create_refresh_token(user_data,
                                          expires_delta=refresh_expires)
     if location_ip != 0:
         user.update_activity_tracking(location_ip)

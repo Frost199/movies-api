@@ -3,11 +3,11 @@ User Resource Url module
 """
 from flask_restful import Api
 
+from Resources.movies.movies import MoviesList
 from urls_abstract import AbsUrls
-from Resources.users.user import UserRegistration, UserLogin, TokenRefresh
 
 
-class UserUrl(AbsUrls):
+class MoviesUrl(AbsUrls):
     """
     Register User Urls
     """
@@ -24,6 +24,4 @@ class UserUrl(AbsUrls):
         Returns:
 
         """
-        api.add_resource(UserRegistration, '/auth/register')
-        api.add_resource(UserLogin, '/auth/login')
-        api.add_resource(TokenRefresh, '/auth/refresh-token')
+        api.add_resource(MoviesList, "/movies/external/<int:page>")

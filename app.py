@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
 from marshmallow import ValidationError
 
+from Resources.movies.routes import MoviesUrl
 from Resources.users.routes import UserUrl
 from urls_abstract import AbsUrls
 
@@ -64,6 +65,7 @@ def register_resource(application: Flask):
     """
     api = AbsUrls.register_application(application)
     UserUrl.add_url(api)
+    MoviesUrl.add_url(api)
 
 
 def db_migrate(application: Flask, db_to_migrate: db) -> None:
@@ -123,7 +125,7 @@ def expired_token_callback():
     """
     return (
         jsonify({"description": "This token has expired",
-                 "error": "token_expired"}),
+                 "error": "token expired"}),
         401,
     )
 
@@ -141,7 +143,7 @@ def invalid_token_callback(error):
     return (
         jsonify(
             {"description": "Signature verification failed",
-             "error": "invalid_token"}
+             "error": "invalid token"}
         ),
         401,
     )
@@ -161,8 +163,8 @@ def missing_token_callback(error):
     return (
         jsonify(
             {
-                "description": "Request doe not contain an access token",
-                "error": "authorization_required",
+                "description": "Request does not contain an access token",
+                "error": "authorization required",
             }
         ),
         401,
@@ -179,24 +181,7 @@ def token_not_fresh_callback():
     """
     return (
         jsonify({"description": "Token is not fresh",
-                 "error": "fresh_token_required"}),
-        401,
-    )
-
-
-# Revoking a token when user logs out or token has being revoked
-@jwt.revoked_token_loader
-def revoked_token_loader():
-    """
-    Message when a token is revoked
-    Returns:
-
-    """
-    return (
-        jsonify(
-            {"description": "The token has been revoked",
-             "error": "token_revoked"}
-        ),
+                 "error": "fresh token required"}),
         401,
     )
 
@@ -209,6 +194,19 @@ def handle_marshmallow_validation(err):
     :return:
     """
     return jsonify(err.messages), 400
+
+
+@movies_app.errorhandler(404)
+def handle_404(err) -> jsonify:
+    """
+    Handle 404 errors
+    Args:
+        err:
+
+    Returns:
+
+    """
+    return jsonify({"description": str(err), "error": "unknown resource"}), 404
 
 
 if __name__ == "__main__":
