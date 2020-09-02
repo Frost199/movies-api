@@ -8,6 +8,7 @@ env:
   global:
     - APP_SECRET_KEY=supersecretkey
     - JWT_SECRET_KEY=supersecretkey
+    - MOVIE_API_KEY=secretkey
 
 script:
   - python -m unittest
