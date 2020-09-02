@@ -18,3 +18,5 @@ SQLAlchemy==1.3.19
 SQLAlchemy-Utils==0.36.8
 uwsgi==2.0.19.1
 Werkzeug==1.0.1
+gunicorn==20.0.4
+
