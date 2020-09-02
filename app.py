@@ -95,6 +95,15 @@ movies_app = create_app()
 jwt = JWTManager(movies_app)
 
 
+@movies_app.before_first_request
+def create_tables():
+    """
+    create a database
+    :return:
+    """
+    db.create_all()
+
+
 # adding claims to a jwt to check somethings the user claims to be
 @jwt.user_claims_loader
 def add_claims_to_jwt(identity):
